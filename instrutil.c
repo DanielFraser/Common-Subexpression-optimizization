@@ -109,7 +109,7 @@ emit(int label_index,
   }
 
   else {
-
+    //check hash function
     switch (opcode) { /* ---------------------- CSE OPTIMIZED ------------------------------- */
     case NOP: 
       fprintf(outfile, "%s\t nop \n", label);
@@ -137,7 +137,8 @@ emit(int label_index,
       fprintf(outfile, "%s\t loadAI r%d, %d \t=> r%d \n", label, field1, field2, field3);
       return field3;
       break;
-    case STOREAI: 
+    case STOREAI:
+      //add and remove (if needed) var
       /* Example: storeAI r1 => r2, 16 */
       fprintf(outfile, "%s\t storeAI r%d \t=> r%d, %d \n", label, field1, field2, field3);
       break;

@@ -7,5 +7,6 @@ def getIloc():
     return iloc
 
 os.system("make")
-os.system("codegen < testcases/demo8")
-#sim.start(getIloc())
+os.system("codegen < testcases/demo1")
+os.system("codegen -O < testcases/demo1")
+sim.start(getIloc())
