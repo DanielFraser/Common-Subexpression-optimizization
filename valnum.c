@@ -13,51 +13,80 @@
 
 #define HASH_TABLE_SIZE 1000
 
-static entry** RegTable;
+static entry **RegTable;
 
-//hashes input
-int hash(char op, int r1, int r2)
-{
-    int num = 0; //no op gets first quarter of array
-    switch (op)
-    {
+//Done
+int hash(char op, int r1, int r2) {
+    int num = 0; //no op gets 1st quarter of array
+    switch (op) {
         case '+':
-            num = 1*(HASH_TABLE_SIZE/4); //gets 2nd
+            num = 1 * (HASH_TABLE_SIZE / 4); //gets 2nd
             break;
         case '-':
-            num = 2*(HASH_TABLE_SIZE/4); //gets 3rd
+            num = 2 * (HASH_TABLE_SIZE / 4); //gets 3rd
             break;
         case '*':
-            num = 3*(HASH_TABLE_SIZE/4); //gets 4th
+            num = 3 * (HASH_TABLE_SIZE / 4); //gets 4th
             break;
     }
 
-    return (((32 * r1) + r2) + num) % HASH_TABLE_SIZE;
+    return (((4 * r1) + r2) + num) % HASH_TABLE_SIZE;
 }
 
-void addEntry(char op, int r1, int r2, int offset) {
+//Done
+//make constants have r2 = -1
+void addEntry(char op, int r1, int r2, int r3, int offset) {
     if (op == '0') //we have a var
         r2 = offset;
-    int hashV = hash(op, r1, r2);
-    RegTable[hashV] = (entry *) malloc(sizeof(entry));
-    RegTable[hashV]->op = op;
-    RegTable[hashV]->r1 = r1;
-    RegTable[hashV]->r2 = r2;
+    if (!lookupR(op, r1, r2)) {
+        int hashV = hash(op, r1, r2);
+        RegTable[hashV] = (entry *) malloc(sizeof(entry));
+        RegTable[hashV]->op = op;
+        RegTable[hashV]->r1 = r1;
+        RegTable[hashV]->r2 = r2;
+        RegTable[hashV]->r3 = r3;
+    }
 }
 
-entry* lookupR(char op, int r1, int r2) {
+//Done
+int modifyVar(int r1, int r2) {
+    entry* a = findVar(r1, r2);
+    if (!a) {
+        addEntry('0', r1, r2, r2, r2);
+    } else {
+        a -> r1 = r1; //change to new reg
+    }
+}
+
+//Done
+entry *findVar(int r1, int r2) {
+    int i;
+    for (i = 0; i < HASH_TABLE_SIZE; i++) {
+        if (RegTable[i] != NULL) {
+            if (RegTable[i]->op == '0' && RegTable[i]->r2 == r2) {
+                if(r1 != 0)
+                    RegTable[i]->r1 = r1;
+                return RegTable[i];
+            }
+        }
+    }
+    return NULL;
+}
+
+//Done
+entry *lookupR(char op, int r1, int r2) {
     int currentIndex;
 
     currentIndex = hash(op, r1, r2);
-    if(RegTable[currentIndex])
+    if (RegTable[currentIndex])
         return RegTable[currentIndex];
     return NULL;
 }
 
-
+//Done
 void InitVarHash() {
 
-    if(!RegTable) {
+    if (!RegTable) {
         int i;
 
         RegTable = (entry **) malloc(sizeof(entry *) * HASH_TABLE_SIZE);
@@ -66,7 +95,7 @@ void InitVarHash() {
     }
 }
 
-int findOffset(int num)
+void deleteEntries(int r1)
 {
 
 }
