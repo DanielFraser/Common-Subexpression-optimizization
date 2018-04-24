@@ -104,7 +104,9 @@ def parse(line):
         print(action)
 
 def start(iloc):
-    global lines
+    global lines, cycles
+    cycles = 0
+    lines = 1
     for line in iloc.split('\n'):
         line = line.strip()
         if line and "//" not in line:

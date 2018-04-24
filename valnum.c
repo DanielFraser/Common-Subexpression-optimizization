@@ -14,19 +14,20 @@
 #define HASH_TABLE_SIZE 1000
 
 static entry **RegTable;
+node *head = NULL;
 
 //Done
 int hash(char op, int r1, int r2) {
-    int num = 0; //no op gets 1st quarter of array
+    int num = 0; //num is to reduce amount of collisions
     switch (op) {
         case '+':
-            num = 1 * (HASH_TABLE_SIZE / 4); //gets 2nd
+            num = 10;
             break;
         case '-':
-            num = 2 * (HASH_TABLE_SIZE / 4); //gets 3rd
+            num = 20;
             break;
         case '*':
-            num = 3 * (HASH_TABLE_SIZE / 4); //gets 4th
+            num = 30;
             break;
     }
 
@@ -35,38 +36,48 @@ int hash(char op, int r1, int r2) {
 
 //Done
 //make constants have r2 = -1
-void addEntry(char op, int r1, int r2, int r3, int offset) {
-    if (op == '0') //we have a var
-        r2 = offset;
+void addEntry(char op, int r1, int r2, int r3) {
+
     if (!lookupR(op, r1, r2)) {
-        int hashV = hash(op, r1, r2);
-        RegTable[hashV] = (entry *) malloc(sizeof(entry));
-        RegTable[hashV]->op = op;
-        RegTable[hashV]->r1 = r1;
-        RegTable[hashV]->r2 = r2;
-        RegTable[hashV]->r3 = r3;
+        int hashV = hash(op, r1, r2), i;
+        for (i = hashV; i < HASH_TABLE_SIZE; i++) { //keep looping until we find an empty slot
+            if (RegTable[i] == NULL) {
+                RegTable[i] = (entry *) malloc(sizeof(entry));
+                RegTable[i]->op = op;
+                RegTable[i]->r1 = r1;
+                RegTable[i]->r2 = r2;
+                RegTable[i]->r3 = r3;
+                return;
+            }
+        }
+    }
+}
+
+void addVar(int offset, int r3) {
+    printf("\nhmm\n");
+    deleteEntries(offset); //remove any if necessary
+    int hashnum = hash('v', offset, 2), i;
+    for (i = hashnum; i < HASH_TABLE_SIZE; i++) { //keep looping until we find an empty slot
+        if (RegTable[i] == NULL) {
+            RegTable[i] = (entry *) malloc(sizeof(entry));
+            RegTable[i]->op = 'v';
+            RegTable[i]->r1 = -1;
+            RegTable[i]->r2 = offset;
+            RegTable[i]->r3 = r3;
+            return;
+        }
     }
 }
 
 //Done
-int modifyVar(int r1, int r2) {
-    entry* a = findVar(r1, r2);
-    if (!a) {
-        addEntry('0', r1, r2, r2, r2);
-    } else {
-        a -> r1 = r1; //change to new reg
-    }
-}
-
-//Done
-entry *findVar(int r1, int r2) {
+entry *findVar(int offset) {
     int i;
-    for (i = 0; i < HASH_TABLE_SIZE; i++) {
-        if (RegTable[i] != NULL) {
-            if (RegTable[i]->op == '0' && RegTable[i]->r2 == r2) {
-                if(r1 != 0)
-                    RegTable[i]->r1 = r1;
-                return RegTable[i];
+    if (offset >= 0) {
+        for (i = hash('v', offset, 2); i < HASH_TABLE_SIZE; i++) {
+            if (RegTable[i] != NULL) {
+                if (RegTable[i]->op == 'v' && RegTable[i]->r2 == offset) {
+                    return RegTable[i];
+                }
             }
         }
     }
@@ -76,10 +87,22 @@ entry *findVar(int r1, int r2) {
 //Done
 entry *lookupR(char op, int r1, int r2) {
     int currentIndex;
-
+    int i;
     currentIndex = hash(op, r1, r2);
-    if (RegTable[currentIndex])
-        return RegTable[currentIndex];
+    for (i = currentIndex; i < HASH_TABLE_SIZE; i++) {
+        if (RegTable[i] != NULL) {
+            if (RegTable[i]->op == op && RegTable[i]->r1 == r1 && RegTable[i]->r2 == r2) {
+                if (r1 != 0)
+                    RegTable[i]->r1 = r1;
+                return RegTable[i];
+            } else if ((op == '+' || op == '*') && RegTable[i]->op == op && RegTable[i]->r1 == r2 &&
+                       RegTable[i]->r2 == r2) {
+                if (r1 != 0)
+                    RegTable[i]->r1 = r1;
+                return RegTable[i];
+            }
+        }
+    }
     return NULL;
 }
 
@@ -95,7 +118,67 @@ void InitVarHash() {
     }
 }
 
-void deleteEntries(int r1)
-{
+void startList(int reg) {
+    head = malloc(sizeof(node));
+    head->reg = reg;
+    head->next = NULL;
+}
 
+int indexOf(char op, int r1, int r2, int r3) {
+    node *cursor = head;
+    while (cursor->next) {
+        if (op != 'v' && op != 'c') {
+            if (r1 == cursor->reg || r2 == cursor->reg)
+                return 1;
+            cursor = cursor->next;
+        }
+    }
+    return 0;
+}
+
+void push(int reg) {
+    node *temp = malloc(sizeof(node));
+    temp->reg = reg;
+    temp->next = NULL;
+    node *cursor = head;
+    if (head) {
+        while (cursor->next)
+            cursor = cursor->next;
+        cursor->next = temp;
+        printf("good");
+    } else {
+        head = temp;
+        printf("good");
+    }
+}
+
+void deleteVar(int offset) {
+    int i;
+    for (i = hash('v', offset, 2); i < HASH_TABLE_SIZE; i++) {
+        if (RegTable[i] != NULL) {
+            if (RegTable[i]->op == 'v' && RegTable[i]->r2 == offset) {
+                RegTable[i] = NULL;
+                return;
+            }
+        }
+    }
+}
+
+void deleteEntries(int r1) {
+    int done = 0, changes = 0;
+    entry *a = findVar(r1);
+    printf("\nhere: %b\n", a == NULL);
+    if (a) {
+        push(a->r3);
+        int i, reg;
+        deleteVar(r1); //remove from hashtable
+        printf("\nwe got here\n");
+        for (i = 0; i < HASH_TABLE_SIZE; i++)
+            //make sure its not a constant or var (since we use r1 and r2 different things)
+            if (RegTable[i] && indexOf(RegTable[i]->op, RegTable[i]->r1, RegTable[i]->r2, RegTable[i]->r3)) {
+                push(RegTable[i]->r3);
+                RegTable[i] = NULL;
+                changes = 1;
+            }
+    }
 }

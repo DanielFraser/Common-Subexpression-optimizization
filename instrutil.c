@@ -128,7 +128,7 @@ emit(int label_index,
                     return a->r3;
                 break;
             case MULT:
-                a = lookupR('-', field1, field2);
+                a = lookupR('*', field1, field2);
                 if (!a) {
                     fprintf(outfile, "%s\t mult r%d, r%d \t=> r%d \n", label, field1, field2, field3);
                     return field3;
@@ -137,7 +137,7 @@ emit(int label_index,
                 break;
             case LOADI:
                 /* Example: loadI 1024 => r1 */
-                a = lookupR('0', field1, 0);
+                a = lookupR('c', field1, 0);
                 if (!a) {
                     fprintf(outfile, "%s\t loadI %d \t=> r%d \n", label, field1, field2);
                     return field2;
@@ -147,18 +147,17 @@ emit(int label_index,
                 break;
             case LOADAI:
                 /* Example: loadAI r1, 16 => r3 */
-                a = lookupR('0', field1, field2);
+                a = findVar(field2);
                 if (!a) {
                     fprintf(outfile, "%s\t loadAI r%d, %d \t=> r%d \n", label, field1, field2, field3);
                     return field3;
                 } else
-                    a->r3;
+                    return a->r3;
                 break;
             case STOREAI:
-                //add and remove (if needed) var
                 /* Example: storeAI r1 => r2, 16 */
                 fprintf(outfile, "%s\t storeAI r%d \t=> r%d, %d \n", label, field1, field2, field3);
-                deleteEntries(-field3);
+                addVar(field3, field1);
                 break;
             case OUTPUTAI:
                 /* Example: outputAI r0, 16  */

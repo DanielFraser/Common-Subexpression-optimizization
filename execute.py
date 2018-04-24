@@ -6,7 +6,18 @@ def getIloc():
         iloc = code.read()
     return iloc
 
+def saveILOC(filename, data):
+    with open(filename, 'w+') as file:
+        file.write(data)
+
+testcase = "testcases/demo4"
 os.system("make")
-os.system("codegen < testcases/demo1")
-os.system("codegen -O < testcases/demo1")
-sim.start(getIloc())
+os.system("codegen < "+testcase)
+data = getIloc()
+saveILOC('iloc1.out', data)
+os.system("codegen -O < "+testcase)
+data1 = getIloc()
+sim.start(data)
+sim.start(data1)
+# print(data)
+# print(data1)
