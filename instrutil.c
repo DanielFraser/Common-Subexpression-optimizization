@@ -115,6 +115,7 @@ emit(int label_index,
                 a = lookupR('+', field1, field2);
                 if (!a) {
                     fprintf(outfile, "%s\t add r%d, r%d \t=> r%d \n", label, field1, field2, field3);
+                    addEntry('+', field1, field2, field3);
                     return field3;
                 } else
                     return a->r3;
@@ -123,6 +124,7 @@ emit(int label_index,
                 a = lookupR('-', field1, field2);
                 if (!a) {
                     fprintf(outfile, "%s\t sub r%d, r%d \t=> r%d \n", label, field1, field2, field3);
+                    addEntry('-', field1, field2, field3);
                     return field3;
                 } else
                     return a->r3;
@@ -131,15 +133,17 @@ emit(int label_index,
                 a = lookupR('*', field1, field2);
                 if (!a) {
                     fprintf(outfile, "%s\t mult r%d, r%d \t=> r%d \n", label, field1, field2, field3);
+                    addEntry('*', field1, field2, field3);
                     return field3;
                 } else
                     return a->r3;
                 break;
             case LOADI:
                 /* Example: loadI 1024 => r1 */
-                a = lookupR('c', field1, 0);
+                a = lookupR('c', field1, -1);
                 if (!a) {
                     fprintf(outfile, "%s\t loadI %d \t=> r%d \n", label, field1, field2);
+                    addEntry('c', field1, -1, field2);
                     return field2;
                 } else
                     return a->r3;

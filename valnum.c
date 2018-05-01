@@ -31,6 +31,14 @@ int hash(char op, int r1, int r2) {
             break;
     }
 
+    if(op == '+' || op == '*')
+    {
+        int a = (((4 * r1) + r2) + num) % HASH_TABLE_SIZE;
+        int b = (((4 * r2) + r1) + num) % HASH_TABLE_SIZE;
+        if(a<b)
+            return a;
+        return b;
+    }
     return (((4 * r1) + r2) + num) % HASH_TABLE_SIZE;
 }
 
@@ -54,7 +62,6 @@ void addEntry(char op, int r1, int r2, int r3) {
 }
 
 void addVar(int offset, int r3) {
-    printf("\nhmm\n");
     deleteEntries(offset); //remove any if necessary
     int hashnum = hash('v', offset, 2), i;
     for (i = hashnum; i < HASH_TABLE_SIZE; i++) { //keep looping until we find an empty slot
@@ -92,13 +99,10 @@ entry *lookupR(char op, int r1, int r2) {
     for (i = currentIndex; i < HASH_TABLE_SIZE; i++) {
         if (RegTable[i] != NULL) {
             if (RegTable[i]->op == op && RegTable[i]->r1 == r1 && RegTable[i]->r2 == r2) {
-                if (r1 != 0)
-                    RegTable[i]->r1 = r1;
                 return RegTable[i];
             } else if ((op == '+' || op == '*') && RegTable[i]->op == op && RegTable[i]->r1 == r2 &&
                        RegTable[i]->r2 == r2) {
-                if (r1 != 0)
-                    RegTable[i]->r1 = r1;
+
                 return RegTable[i];
             }
         }
@@ -145,10 +149,8 @@ void push(int reg) {
         while (cursor->next)
             cursor = cursor->next;
         cursor->next = temp;
-        printf("good");
     } else {
         head = temp;
-        printf("good");
     }
 }
 
@@ -167,12 +169,10 @@ void deleteVar(int offset) {
 void deleteEntries(int r1) {
     int done = 0, changes = 0;
     entry *a = findVar(r1);
-    printf("\nhere: %b\n", a == NULL);
     if (a) {
         push(a->r3);
         int i, reg;
         deleteVar(r1); //remove from hashtable
-        printf("\nwe got here\n");
         for (i = 0; i < HASH_TABLE_SIZE; i++)
             //make sure its not a constant or var (since we use r1 and r2 different things)
             if (RegTable[i] && indexOf(RegTable[i]->op, RegTable[i]->r1, RegTable[i]->r2, RegTable[i]->r3)) {

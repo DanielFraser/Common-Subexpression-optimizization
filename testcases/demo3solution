@@ -1,0 +1,25 @@
+	//  THIS IS CSE OPTIMIZED CODE
+	// Assign STATIC_AREA_ADDRESS to register "r0"
+ 	 loadI 1024 	=> r0 
+ 	 loadI 1 	=> r1 
+ 	 storeAI r1 	=> r0, 0 
+ 	 loadI 2 	=> r2 
+ 	 storeAI r2 	=> r0, 4 
+ 	 add r1, r2 	=> r5 
+ 	 storeAI r5 	=> r0, 0 
+	// Code for "PRINT" from offset -4
+ 	 storeAI r5 	=> r0, -4 
+ 	 outputAI r0, -4
+ 	 mult r5, r2 	=> r9 
+ 	 storeAI r9 	=> r0, 8 
+	// Code for "PRINT" from offset -4
+ 	 storeAI r9 	=> r0, -4 
+ 	 outputAI r0, -4
+ 	 add r5, r9 	=> r13 
+ 	 add r13, r1 	=> r15 
+ 	 loadI 3 	=> r16 
+ 	 add r15, r16 	=> r17 
+ 	 storeAI r17 	=> r0, 12 
+	// Code for "PRINT" from offset -4
+ 	 storeAI r17 	=> r0, -4 
+ 	 outputAI r0, -4

@@ -16,18 +16,26 @@ typedef struct {
     int r3; //result of op
 } entry;
 
-typedef struct A{
+typedef struct A {
     int reg; //+,-,*,v,c
-    struct A* next;
+    struct A *next;
 } node;
 
 /* INSERT WHATEVER YOU NEED FOR THE VALUE NUMBER HASH FUNCTION */
 int hash(char, int, int);
+
 void InitVarHash();
+
 void addEntry(char, int, int, int);
-entry* lookupR(char, int, int);
+
+entry *lookupR(char, int, int);
+
 int modifyVar(int, int);
+
 entry *findVar(int);
+
 void deleteEntries(int);
+
 void addVar(int, int);
+
 #endif

@@ -10,14 +10,12 @@ def saveILOC(filename, data):
     with open(filename, 'w+') as file:
         file.write(data)
 
-testcase = "testcases/demo4"
-os.system("make")
-os.system("codegen < "+testcase)
-data = getIloc()
-saveILOC('iloc1.out', data)
-os.system("codegen -O < "+testcase)
-data1 = getIloc()
-sim.start(data)
-sim.start(data1)
-# print(data)
-# print(data1)
+for x in range(1,5):
+    testcase = "testcases/demo{}".format(x)
+    os.system("make")
+    os.system("codegen < "+testcase)
+    data = getIloc()
+    os.system("codegen -O < "+testcase)
+    data1 = getIloc()
+    if(sim.start(data) == sim.start(data1)):
+        saveILOC('testcases/demo{}solution'.format(x), data1)
